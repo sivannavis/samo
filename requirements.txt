@@ -1,0 +1,11 @@
+torch>=1.6.0
+torchcontrib
+numpy
+soundfile
+pytorch_model_summary
+pyyaml
+matplotlib
+tqdm
+librosa
+torchaudio
+torch_lr_finder
