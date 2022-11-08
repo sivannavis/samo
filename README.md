@@ -1,6 +1,6 @@
 # SAMO
 
-This repo provides codes for paper "SAMO: Speaker Attractor Multi-Center One-Class Learning for Voice Anti-Spoofing".
+This repo provides codes for paper ["SAMO: Speaker Attractor Multi-Center One-Class Learning for Voice Anti-Spoofing"](https://arxiv.org/abs/2211.02718).
 
 ## Preparation
 - Installing dependencies
