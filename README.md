@@ -36,6 +36,14 @@ This is built upon open-source repos:
 - [AASIST](https://github.com/clovaai/aasist)
 
 ## References
+```bibtex
+@article{ding2022samo,
+  title={SAMO: Speaker Attractor Multi-Center One-Class Learning for Voice Anti-Spoofing},
+  author={Ding, Siwen and Zhang, You and Duan, Zhiyao},
+  journal={arXiv preprint arXiv:2211.02718},
+  year={2022}
+}
+```
 
 ```bibtex
 @article{wang2020asvspoof,
