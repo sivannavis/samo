@@ -5,6 +5,8 @@ MIT license
 """
 # Code from https://github.com/clovaai/aasist
 
+import json
+import os
 import random
 from typing import Union
 
@@ -12,12 +14,8 @@ import numpy as np
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from torch import Tensor
 from pytorch_model_summary import summary
-import os
-import json
-from importlib import import_module
-
+from torch import Tensor
 
 
 class GraphAttentionLayer(nn.Module):
@@ -335,7 +333,7 @@ class CONV(nn.Module):
 
     @staticmethod
     def to_hz(mel):
-        return 700 * (10**(mel / 2595) - 1)
+        return 700 * (10 ** (mel / 2595) - 1)
 
     def __init__(self,
                  out_channels,
@@ -350,7 +348,6 @@ class CONV(nn.Module):
                  mask=False):
         super().__init__()
         if in_channels != 1:
-
             msg = "SincConv only support one input channel (here, in_channels = {%i})" % (
                 in_channels)
             raise ValueError(msg)
@@ -385,10 +382,10 @@ class CONV(nn.Module):
         for i in range(len(self.mel) - 1):
             fmin = self.mel[i]
             fmax = self.mel[i + 1]
-            hHigh = (2*fmax/self.sample_rate) * \
-                np.sinc(2*fmax*self.hsupp/self.sample_rate)
-            hLow = (2*fmin/self.sample_rate) * \
-                np.sinc(2*fmin*self.hsupp/self.sample_rate)
+            hHigh = (2 * fmax / self.sample_rate) * \
+                    np.sinc(2 * fmax * self.hsupp / self.sample_rate)
+            hLow = (2 * fmin / self.sample_rate) * \
+                   np.sinc(2 * fmin * self.hsupp / self.sample_rate)
             hideal = hHigh - hLow
 
             self.band_pass[i, :] = Tensor(np.hamming(
@@ -463,7 +460,7 @@ class Residual_block(nn.Module):
         out = self.selu(out)
         # print('out',out.shape)
         out = self.conv2(out)
-        #print('conv2 out',out.shape)
+        # print('conv2 out',out.shape)
         if self.downsample:
             identity = self.conv_downsample(identity)
 
@@ -532,7 +529,6 @@ class Model(nn.Module):
         self.out_layer = nn.Linear(5 * gat_dims[1], 2)
 
     def forward(self, x, Freq_aug=False):
-
         # print(x.shape)
         x = x.unsqueeze(1)
         x = self.conv_time(x, mask=Freq_aug)
@@ -616,6 +612,7 @@ class Model(nn.Module):
 
         return last_hidden, output
 
+
 if __name__ == "__main__":
     os.environ["CUDA_VISIBLE_DEVICES"] = "1"
     # set device
@@ -623,7 +620,6 @@ if __name__ == "__main__":
     # print("Device: {}".format(device))
     # if device == "cpu":
     #     raise ValueError("GPU not detected!")
-
 
     with open("AASIST.conf", "r") as f_json:
         config = json.loads(f_json.read())
@@ -638,5 +634,5 @@ if __name__ == "__main__":
     print(summary(feat_model, torch.randn((64, 120000)), show_input=False))
     raw = torch.randn(64, 120000)
     feat, out = feat_model(raw)
-    print("feat shape",feat.shape)
-    print("out shape",out.shape)
+    print("feat shape", feat.shape)
+    print("out shape", out.shape)

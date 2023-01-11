@@ -1,24 +1,21 @@
 import numpy as np
 import soundfile as sf
-import torch
 from torch import Tensor
 from torch.utils.data import Dataset
-import random
-from pathlib import Path
 
 # modified from https://github.com/clovaai/aasist
 ___author__ = "Hemlata Tak, Jee-weon Jung"
 __email__ = "tak@eurecom.fr, jeeweon.jung@navercorp.com"
 
-# protocol to utt_list[speaker_id] = list of utt
-def genSpoof_list(dir_meta, enroll = False, train = True, target_only = False, enroll_spk = None):
 
+# protocol to utt_list[speaker_id] = list of utt
+def genSpoof_list(dir_meta, enroll=False, train=True, target_only=False, enroll_spk=None):
     d_meta = {}
     utt_list = []
     tag_list = []
     utt2spk = {}
 
-    if not enroll and train: # read train
+    if not enroll and train:  # read train
         with open(dir_meta, "r") as f:
             l_meta = f.readlines()
 
@@ -32,8 +29,8 @@ def genSpoof_list(dir_meta, enroll = False, train = True, target_only = False, e
             utt2spk[key] = spk
             tag_list.append(tag)
             utt_list.append(key)
-            d_meta[key] = 1 if label != "bonafide" else 0 # bona: 0 spoof: 1
-    elif not enroll and not train: # read dev and eval
+            d_meta[key] = 1 if label != "bonafide" else 0  # bona: 0 spoof: 1
+    elif not enroll and not train:  # read dev and eval
         with open(dir_meta, "r") as f:
             l_meta = f.readlines()
 
@@ -41,7 +38,7 @@ def genSpoof_list(dir_meta, enroll = False, train = True, target_only = False, e
             spk, key, _, tag, label = line.strip().split(" ")
             # spk = int(spk[-4:])
 
-            if not target_only or spk in enroll_spk: # ensure target only speakers
+            if not target_only or spk in enroll_spk:  # ensure target only speakers
                 if key in utt2spk:
                     print("Duplicated utt error", key)
 
@@ -49,7 +46,7 @@ def genSpoof_list(dir_meta, enroll = False, train = True, target_only = False, e
                 utt_list.append(key)
                 tag_list.append(tag)
                 d_meta[key] = 1 if label != "bonafide" else 0
-    else: # read in enroll data
+    else:  # read in enroll data
         for dir in dir_meta:
             with open(dir, "r") as f:
                 l_meta = f.readlines()
@@ -72,7 +69,6 @@ def genSpoof_list(dir_meta, enroll = False, train = True, target_only = False, e
         # print(utt2spk)
 
     return d_meta, utt_list, utt2spk, tag_list
-
 
 
 def pad(x, max_len=64600):
@@ -100,7 +96,7 @@ def pad_random(x: np.ndarray, max_len: int = 64600):
 
 # utt_list to (input, label, speaker, utt)
 class ASVspoof2019_speaker_raw(Dataset):
-    def __init__(self, list_IDs, labels, utt2spk, base_dir, tag_list, train = True, cut = 64600):
+    def __init__(self, list_IDs, labels, utt2spk, base_dir, tag_list, train=True, cut=64600):
         """self.list_IDs	: list of strings (each string: utt key),
            self.labels      : dictionary (key: utt key, value: label integer)"""
         self.list_IDs = list_IDs
@@ -120,7 +116,7 @@ class ASVspoof2019_speaker_raw(Dataset):
         X, _ = sf.read(str(self.base_dir + f"flac/{key}.flac"))
         if self.train:
             X_pad = pad_random(X, self.cut)
-        else: # load for dev and eval
+        else:  # load for dev and eval
             X_pad = pad(X, self.cut)
         x_inp = Tensor(X_pad)
         y = self.labels[key]

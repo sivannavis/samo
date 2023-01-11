@@ -1,21 +1,25 @@
 import os
-import eval_metrics as em
-import torch
 import random
-import numpy as np
 from itertools import count
 from math import cos, gamma, pi, sin, sqrt
 from typing import Callable, Iterator, List
+
 import matplotlib.pyplot as plt
+import numpy as np
+import torch
+
+import eval_metrics as em
+
 
 # Seeding
 def seed_worker(worker_id):
     """
     Used in generating seed for the worker of torch.utils.data.Dataloader
     """
-    worker_seed = torch.initial_seed() % 2**32
+    worker_seed = torch.initial_seed() % 2 ** 32
     np.random.seed(worker_seed)
     random.seed(worker_seed)
+
 
 def setup_seed(random_seed, cudnn_deterministic=True):
     """ set_random_seed(random_seed, cudnn_deterministic=True)
@@ -32,21 +36,23 @@ def setup_seed(random_seed, cudnn_deterministic=True):
     """
 
     # # initialization
-    torch.manual_seed(random_seed) #PyTorch random number generator
-    random.seed(random_seed) #python operators
-    np.random.seed(random_seed) # numpy generator
+    torch.manual_seed(random_seed)  # PyTorch random number generator
+    random.seed(random_seed)  # python operators
+    np.random.seed(random_seed)  # numpy generator
     os.environ['PYTHONHASHSEED'] = str(random_seed)
 
     if torch.cuda.is_available():
         torch.cuda.manual_seed_all(random_seed)
-        torch.backends.cudnn.deterministic = cudnn_deterministic # CUDA convolution determinism
-        torch.backends.cudnn.benchmark = False # Disabling the benchmarking feature, deterministically select an algorithm
+        torch.backends.cudnn.deterministic = cudnn_deterministic  # CUDA convolution determinism
+        torch.backends.cudnn.benchmark = False  # Disabling the benchmarking feature, deterministically select an algorithm
+
 
 # Learning rate schedules
 def cosine_annealing(step, total_steps, lr_max, lr_min):
     """Cosine Annealing for learning rate decay scheduler"""
     return lr_min + (lr_max -
                      lr_min) * 0.5 * (1 + np.cos(step / total_steps * np.pi))
+
 
 def adjust_learning_rate(args, lr, optimizer, epoch_num):
     '''
@@ -55,6 +61,7 @@ def adjust_learning_rate(args, lr, optimizer, epoch_num):
     lr = lr * (args.lr_decay ** (epoch_num // args.interval))
     for param_group in optimizer.param_groups:
         param_group['lr'] = lr
+
 
 # Compute eval metrics
 def compute_eer_tdcf(args, cm_score_file):
@@ -82,7 +89,7 @@ def compute_eer_tdcf(args, cm_score_file):
     cm_data = np.genfromtxt(cm_score_file, dtype=str)
     # cm_utt_id = cm_data[:, 0]
     cm_sources = cm_data[:, 1]
-    cm_keys = cm_data[:, 2].astype(int) # label
+    cm_keys = cm_data[:, 2].astype(int)  # label
     cm_scores = cm_data[:, 3].astype(float)
 
     # Extract target, nontarget, and spoof scores from the ASV scores
@@ -145,6 +152,7 @@ def compute_eer_tdcf(args, cm_score_file):
 
     return eer_cm, min_tDCF
 
+
 ## Generate evenly distributed samples on a hypersphere
 ## Refer to https://stackoverflow.com/questions/57123194/how-to-distribute-points-evenly-on-the-surface-of-hyperspheres-in-higher-dimensi
 def int_sin_m(x: float, m: int) -> float:
@@ -155,8 +163,9 @@ def int_sin_m(x: float, m: int) -> float:
         return 1 - cos(x)
     else:
         return (m - 1) / m * int_sin_m(x, m - 2) - cos(x) * sin(x) ** (
-            m - 1
+                m - 1
         ) / m
+
 
 def primes() -> Iterator[int]:
     """Returns an infinite generator of prime numbers"""
@@ -183,12 +192,13 @@ def primes() -> Iterator[int]:
             i += step
         composites[i] = step
 
+
 def inverse_increasing(
-    func: Callable[[float], float],
-    target: float,
-    lower: float,
-    upper: float,
-    atol: float = 1e-10,
+        func: Callable[[float], float],
+        target: float,
+        lower: float,
+        upper: float,
+        atol: float = 1e-10,
 ) -> float:
     """Returns func inverse of target between lower and upper
 
@@ -206,6 +216,7 @@ def inverse_increasing(
         mid = (upper + lower) / 2
         approx = func(mid)
     return mid
+
 
 def uniform_hypersphere(d: int, n: int) -> List[List[float]]:
     """Generate n points over the d dimensional hypersphere"""
@@ -229,6 +240,7 @@ def uniform_hypersphere(d: int, n: int) -> List[List[float]]:
                 points[i][j] *= sin(deg)
             points[i][dim] *= cos(deg)
     return points
+
 
 # Generate experiments curves
 def compare_exps(exp_dirs, root_dir, max_train_loss=None, max_dev_loss=None, eval_available=False):
@@ -274,4 +286,4 @@ def compare_exps(exp_dirs, root_dir, max_train_loss=None, max_dev_loss=None, eva
                 ax4.grid(b=True, which='minor', linestyle=':')
                 ax4.set_ylim([0, 0.08])
                 ax4.legend(exp_dirs)
-    plt.show(block = True)
+    plt.show(block=True)
