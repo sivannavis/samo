@@ -1,12 +1,14 @@
 import os
-import eval_metrics as em
-import torch
 import random
-import numpy as np
 from itertools import count
 from math import cos, gamma, pi, sin, sqrt
 from typing import Callable, Iterator, List
+
 import matplotlib.pyplot as plt
+import numpy as np
+import torch
+
+import eval_metrics as em
 
 
 # Seeding

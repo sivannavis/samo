@@ -1,5 +1,6 @@
-import numpy as np
 import sys
+
+import numpy as np
 
 
 def obtain_asv_error_rates(tar_asv, non_asv, spoof_asv, asv_threshold):

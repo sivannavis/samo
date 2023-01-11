@@ -5,6 +5,8 @@ MIT license
 """
 # Code from https://github.com/clovaai/aasist
 
+import json
+import os
 import random
 from typing import Union
 
@@ -12,10 +14,8 @@ import numpy as np
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from torch import Tensor
 from pytorch_model_summary import summary
-import os
-import json
+from torch import Tensor
 
 
 class GraphAttentionLayer(nn.Module):

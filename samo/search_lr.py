@@ -1,17 +1,30 @@
+import json
+import os
+
+import torch
+import torch.nn as nn
 from torch_lr_finder import LRFinder, TrainDataLoaderIter
-from main import *
+
+from samo.loss import SAMO
+from samo.main import init_params, get_model, get_loader, update_embeds
 
 
-# See also: https://github.com/davidtvs/pytorch-lr-finder/blob/acc5e7e/torch_lr_finder/lr_finder.py#L31-L41
 class MyTrainDataLoaderIter(TrainDataLoaderIter):
+    """
+    See also: https://github.com/davidtvs/pytorch-lr-finder/blob/acc5e7e/torch_lr_finder/lr_finder.py#L31-L41
+    """
+
     def inputs_labels_from_batch(self, batch_data):
         _, labels, _, _, _ = batch_data
         inputs = batch_data
         return inputs, labels  # match (inputs, label)
 
 
-# NOTE: Use this wrapper to unpack input data
 class ModelWrapper(nn.Module):
+    """
+    NOTE: Use this wrapper to unpack input data
+    """
+
     def __init__(self, model):
         super(ModelWrapper, self).__init__()
         self.model = model
@@ -22,8 +35,11 @@ class ModelWrapper(nn.Module):
         return (feats, spk)
 
 
-# NOTE: Use this wrapper to unpack outputs
 class LossFunctionWrapper(nn.Module):
+    """
+    NOTE: Use this wrapper to unpack outputs
+    """
+
     def __init__(self, loss_func, centers):
         super(LossFunctionWrapper, self).__init__()
         self.loss_func = loss_func
@@ -47,17 +63,15 @@ if __name__ == '__main__':
 
     model_config = config["model_config"]
     optim_config = config["optim_config"]
-    module = import_module("aasist.{}".format(model_config["architecture"]))
-    _model = getattr(module, "Model")
-    feat_model = _model(model_config).to(device)
+    feat_model = get_model(model_config)
 
     nb_params = sum([param.view(-1).size()[0] for param in feat_model.parameters()])
     print("no. model params:{}".format(nb_params))
-    args = initParams()
+    args = init_params()
 
     # load datasets
-    trainDataLoader, devDataLoader, evalDataLoader, \
-    trainBonaLoader, devEnrollLoader, evalEnrollLoader, num_centers = get_loader(args)
+    train_data_loader, dev_data_loader, eval_data_loader, \
+    train_bona_loader, dev_enroll_loader, eval_enroll_loader, num_centers = get_loader(args)
 
     optimizer = torch.optim.Adam(feat_model.parameters(),
                                  lr=0.0001,
@@ -67,10 +81,10 @@ if __name__ == '__main__':
 
     # my loss
     samo = SAMO(160, m_real=0.7, m_fake=0, alpha=20).to(device)
-    centers = update_embeds(device, feat_model, trainBonaLoader)
+    centers = update_embeds(device, feat_model, train_bona_loader)
 
     # Create wrappers
-    trainloader_wrapper = MyTrainDataLoaderIter(trainDataLoader)
+    trainloader_wrapper = MyTrainDataLoaderIter(train_data_loader)
     model_wrapper = ModelWrapper(feat_model)
     loss_func_wrapper = LossFunctionWrapper(samo, centers)
 

@@ -1,8 +1,9 @@
+import numpy as np
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-import numpy as np
-from utils import uniform_hypersphere
+
+from samo.utils import uniform_hypersphere
 
 
 class OCSoftmax(nn.Module):
