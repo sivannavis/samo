@@ -4,6 +4,7 @@ import torch.nn.functional as F
 import numpy as np
 from utils import uniform_hypersphere
 
+
 class OCSoftmax(nn.Module):
     def __init__(self, feat_dim=2, m_real=0.5, m_fake=0.2, alpha=20.0, fix_centers=True, initialize_centers="one_hot"):
         super(OCSoftmax, self).__init__()
@@ -26,7 +27,7 @@ class OCSoftmax(nn.Module):
         w = F.normalize(self.center, p=2, dim=1)
         x = F.normalize(x, p=2, dim=1)
 
-        scores = x @ w.transpose(0,1)
+        scores = x @ w.transpose(0, 1)
         output_scores = scores.clone()
 
         scores[labels == 0] = self.m_real - scores[labels == 0]
@@ -36,9 +37,10 @@ class OCSoftmax(nn.Module):
 
         return loss, output_scores.squeeze(1)
 
+
 class SAMO(nn.Module):
     def __init__(self, feat_dim=2, m_real=0.5, m_fake=0.2, alpha=20.0, num_centers=20,
-                initialize_centers="one_hot", addNegEntropy=False):
+                 initialize_centers="one_hot", addNegEntropy=False):
 
         super(SAMO, self).__init__()
         self.feat_dim = feat_dim
@@ -56,7 +58,7 @@ class SAMO(nn.Module):
         if self.addNegEntropy:
             self.softmax = nn.Softmax(dim=1)
 
-    def forward(self, x, labels, spk = None, enroll = None, spoofprint = 0):
+    def forward(self, x, labels, spk=None, enroll=None, spoofprint=0):
         """
         Args:
             x: feature matrix with shape (batch_size, feat_dim).
@@ -77,7 +79,7 @@ class SAMO(nn.Module):
             # for all target only data, speaker-specific center scores
             tmp_w = torch.stack([enroll[id] for id in spk])
             tmp_w = F.normalize(tmp_w, p=2, dim=1).to(x.device)
-            final_scores = torch.sum(x * tmp_w, dim = 1).unsqueeze(-1)
+            final_scores = torch.sum(x * tmp_w, dim=1).unsqueeze(-1)
             # calculate emb_loss by adjusting scores
             maxscores[labels == 0] = self.m_real - final_scores[labels == 0]
         else:
@@ -93,7 +95,7 @@ class SAMO(nn.Module):
             p = scores.sum(0).view(-1)
             p /= p.sum()
 
-            dist_loss = np.log(w.shape[0]) + (p * p.log()).sum() # using num_centers
+            dist_loss = np.log(w.shape[0]) + (p * p.log()).sum()  # using num_centers
 
             loss = dist_loss * 1e5 + emb_loss
             # print(dist_loss.item(), emb_loss.item())
@@ -104,7 +106,7 @@ class SAMO(nn.Module):
 
         return loss, final_scores.squeeze(1)
 
-    def inference(self, x, labels, spk, enroll, attractor = 0):
+    def inference(self, x, labels, spk, enroll, attractor=0):
         """
         Args:
             x: feature matrix with shape (batch_size, feat_dim).
@@ -141,7 +143,7 @@ class SAMO(nn.Module):
             p = scores.sum(0).view(-1)
             p /= p.sum()
 
-            dist_loss = np.log(w.shape[0]) + (p * p.log()).sum() # using num_centers
+            dist_loss = np.log(w.shape[0]) + (p * p.log()).sum()  # using num_centers
 
             loss = dist_loss * 1e5 + emb_loss
             # print(dist_loss.item(), emb_loss.item())

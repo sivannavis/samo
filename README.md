@@ -19,7 +19,7 @@ The `main.py` file contains train/val/eval steps for Softmax/OC-Softmax/SAMO.
 
 For example, to train SAMO:
 ```angular2html
-python3 train.py -o 'path_to_output_folder' -d 'path_to_database' -p 'path_to_protocol'
+python3 samo/train.py -o 'path_to_output_folder' -d 'path_to_database' -p 'path_to_protocol'
 ```
 
 Please check argument setups in `main.py` to specify settings such as batch size and margins.
@@ -27,7 +27,7 @@ Please check argument setups in `main.py` to specify settings such as batch size
 ## Evaluation
 To evaluate pretrained SAMO:
 ```angular2html
-python3 main.py --test_only --test_model "./models/samo.pt" --scoring 'samo' --save_score "samo_score"
+python3 samo/main.py --test_only --test_model "./models/samo.pt" --scoring 'samo' --save_score "samo_score"
 ```
 And the output will show `Test EER: 0.008751418248624953`
 ## Acknowledgement

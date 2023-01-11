@@ -1,8 +1,8 @@
 import numpy as np
 import sys
 
-def obtain_asv_error_rates(tar_asv, non_asv, spoof_asv, asv_threshold):
 
+def obtain_asv_error_rates(tar_asv, non_asv, spoof_asv, asv_threshold):
     # False alarm and miss rates for ASV
     Pfa_asv = sum(non_asv >= asv_threshold) / non_asv.size
     Pmiss_asv = sum(tar_asv < asv_threshold) / tar_asv.size
@@ -17,7 +17,6 @@ def obtain_asv_error_rates(tar_asv, non_asv, spoof_asv, asv_threshold):
 
 
 def compute_det_curve(target_scores, nontarget_scores):
-
     n_scores = target_scores.size + nontarget_scores.size
     all_scores = np.concatenate((target_scores, nontarget_scores))
     labels = np.concatenate((np.ones(target_scores.size), np.zeros(nontarget_scores.size)))
@@ -32,7 +31,8 @@ def compute_det_curve(target_scores, nontarget_scores):
 
     frr = np.concatenate((np.atleast_1d(0), tar_trial_sums / target_scores.size))  # false rejection rates
     far = np.concatenate((np.atleast_1d(1), nontarget_trial_sums / nontarget_scores.size))  # false acceptance rates
-    thresholds = np.concatenate((np.atleast_1d(all_scores[indices[0]] - 0.001), all_scores[indices]))  # Thresholds are the sorted scores
+    thresholds = np.concatenate(
+        (np.atleast_1d(all_scores[indices[0]] - 0.001), all_scores[indices]))  # Thresholds are the sorted scores
 
     return frr, far, thresholds
 
@@ -129,7 +129,6 @@ def compute_tDCF(bonafide_score_cm, spoof_score_cm, Pfa_asv, Pmiss_asv, Pmiss_sp
           TODO: <add link>
     """
 
-
     # Sanity check of cost parameters
     if cost_model['Cfa_asv'] < 0 or cost_model['Cmiss_asv'] < 0 or \
             cost_model['Cfa_cm'] < 0 or cost_model['Cmiss_cm'] < 0:
@@ -163,7 +162,8 @@ def compute_tDCF(bonafide_score_cm, spoof_score_cm, Pfa_asv, Pmiss_asv, Pmiss_sp
 
     # Sanity check of the weights
     if C1 < 0 or C2 < 0:
-        sys.exit('You should never see this error but I cannot evalute tDCF with negative weights - please check whether your ASV error rates are correctly computed?')
+        sys.exit(
+            'You should never see this error but I cannot evalute tDCF with negative weights - please check whether your ASV error rates are correctly computed?')
 
     # Obtain t-DCF curve for all thresholds
     tDCF = C1 * Pmiss_cm + C2 * Pfa_cm
@@ -174,15 +174,19 @@ def compute_tDCF(bonafide_score_cm, spoof_score_cm, Pfa_asv, Pmiss_asv, Pmiss_sp
     # Everything should be fine if reaching here.
     if print_cost:
 
-        print('t-DCF evaluation from [Nbona={}, Nspoof={}] trials\n'.format(bonafide_score_cm.size, spoof_score_cm.size))
+        print(
+            't-DCF evaluation from [Nbona={}, Nspoof={}] trials\n'.format(bonafide_score_cm.size, spoof_score_cm.size))
         print('t-DCF MODEL')
         print('   Ptar         = {:8.5f} (Prior probability of target user)'.format(cost_model['Ptar']))
         print('   Pnon         = {:8.5f} (Prior probability of nontarget user)'.format(cost_model['Pnon']))
         print('   Pspoof       = {:8.5f} (Prior probability of spoofing attack)'.format(cost_model['Pspoof']))
         print('   Cfa_asv      = {:8.5f} (Cost of ASV falsely accepting a nontarget)'.format(cost_model['Cfa_asv']))
-        print('   Cmiss_asv    = {:8.5f} (Cost of ASV falsely rejecting target speaker)'.format(cost_model['Cmiss_asv']))
-        print('   Cfa_cm       = {:8.5f} (Cost of CM falsely passing a spoof to ASV system)'.format(cost_model['Cfa_cm']))
-        print('   Cmiss_cm     = {:8.5f} (Cost of CM falsely blocking target utterance which never reaches ASV)'.format(cost_model['Cmiss_cm']))
+        print(
+            '   Cmiss_asv    = {:8.5f} (Cost of ASV falsely rejecting target speaker)'.format(cost_model['Cmiss_asv']))
+        print(
+            '   Cfa_cm       = {:8.5f} (Cost of CM falsely passing a spoof to ASV system)'.format(cost_model['Cfa_cm']))
+        print('   Cmiss_cm     = {:8.5f} (Cost of CM falsely blocking target utterance which never reaches ASV)'.format(
+            cost_model['Cmiss_cm']))
         print('\n   Implied normalized t-DCF function (depends on t-DCF parameters and ASV errors), s=CM threshold)')
 
         if C2 == np.minimum(C1, C2):
